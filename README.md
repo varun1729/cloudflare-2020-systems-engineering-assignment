@@ -1,57 +1,84 @@
-# Systems Assignment
+# Systems Assignment with Golang
 
-## What is it?
+## Build
 
-This exercise is a follow-on to the [General Assignment](https://github.com/cloudflare-hiring/cloudflare-2020-general-engineering-assignment), you'll need to complete that first.  In this assignment you'll write a program that makes a request to the endpoints you created in the General Assignment.  This is a systems assignment so we want to see that you're able to use sockets directly rather than using a library that handles the HTTP request.
+Ensure you have `go mod`, that is go version above `1.11`.
 
-## Useful Links
+```sh
+$ go mod vendor
+$ go build -mod vendor
+```
 
-- [A Tour of Go](https://tour.golang.org/welcome/1)
-- [The Rust Programming Language](https://doc.rust-lang.org/book/index.html)
-- [Cloudflare General Assignment](https://github.com/cloudflare-hiring/cloudflare-2020-general-engineering-assignment)
+This should create a binary in the directory called `cloudflare-2020-systems-engineering-assignment`. 
 
-## Requirements
+ ## Help Page
 
-### 1. Use one of the specified languages
+```txt
+cloudflare-2020-systems-engineering-assignment
 
-Choose from among C/C++/Go/Rust. If you aren't familiar with these languages, you're not alone! Many engineers join Cloudflare without
-specific language experience. See the Useful Links section for some quickstart guides.
+Usage:
+  cloudflare-2020-systems-engineering-assignment --url=<URL> [--profile=<REPEAT>]
+  cloudflare-2020-systems-engineering-assignment --help
 
-### 2. Use an off the shelf build tool
+Options:
+  --url=<URL>        URL to visit
+  --profile=<REPEAT> Number of times to REPEAT profiling
+  --help             Show this screen.
+```
 
-Choose something to build your assignment that works with the language you chose (Cargo, Make, CMake etc.).  Include instructions in your readme on how to build and run your program.  Don't check-in binaries, we won't run a pre-compiled binary.
+## Notes
 
-### 3. Do **NOT** use a library to handle the HTTP request
+* Package creates a low level TLS connection. 
+* TLS connection is a pipe complying to `io.writer` interface. Here `fmt.fprintf` is used to write to the file.
+* Timeout of one minute.
+* Output includes headers.
+* Executes requests concurrently
+* Does not print output for profiled request
 
-We want to see how familiar you are with systems work.  Although we would normally recommend using a library to handle HTTP requests, for this assignment we want to see how you handle it yourself.
+## Output of Invoking Binary on my `/links` Page 
 
-### 4. Create a CLI tool that makes a request to your links page
+ ### Command
 
-Your CLI tool should take an argument that is a full URL (--url).  The tool will make an HTTP request to the URL and print the response directly to the console.  Test the CLI tool by specifying the /links URL in your General Assignment and make sure it prints the entire json document with all your links.
+```bash
+$ ./cloudflare-2020-systems-engineering-assignment --url https://cloudflare-2020-general-engineering-assignment.varun1729.workers.dev/links
+```
 
-Your CLI tool should also allow a --help parameter that describes how to use it.
+### Output
 
-Feel free to use a library to handle command line argument parsing (getopt etc.).
+```txt
+HTTP/1.1 200 OK
+Date: Sun, 18 Oct 2020 10:21:08 GMT
+Content-Type: application/json
+Content-Length: 152
+Connection: close
+Set-Cookie: __cfduid=df05cf9f8412a2cd7618d36922be3c4241603016468; expires=Tue, 17-Nov-20 10:21:08 GMT; path=/; domain=.varun1729.workers.dev; HttpOnly; SameSite=Lax
+cf-request-id: 05dcd34085000004b81a145000000001
+Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
+Report-To: {"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report?lkg-colo=12&lkg-time=1603016469"}],"group":"cf-nel","max_age":604800}
+NEL: {"report_to":"cf-nel","max_age":604800}
+Server: cloudflare
+CF-RAY: 5e4187e0dc0304b8-LAX
 
-### 5. Measure how fast it is
+[{"name":"CloudFlare","url":"https://www.cloudflare.com"},{"name":"Reddit","url":"https://www.reddit.com"},{"name":"GitHub","url":"https://github.com"}]
+```
 
-Next, add logic to your tool to profile your page.  Add a new argument --profile that takes a positive integer.  Your tool should make that number of requests to your site.  Time the requests and print:
+## `--profile` Output
 
-* The number of requests
-* The fastest time
-* The slowest time
-* The mean & median times
-* The percentage of requests that succeeded
-* Any error codes returned that weren't a success
-* The size in bytes of the smallest response
-* The size in bytes of the largest response
+### https://cloudflare-2020-general-engineering-assignment.varun1729.workers.dev/
 
-Include a screenshot of your tool run against your site and another webpage.
+![](./cloudflare_my_worker.png)
 
-Test your tool against your site and some other websites.  Let us know what you find in your readme.  Include outputs for popular sites and your own.  How do we compare?
+###https://postman-echo.com/get
 
-## Submitting your project
+![](./postman.png)
 
-When submitting your project, you should prepare your code for upload to Greenhouse. The preferred method for doing this is to create a "ZIP archive" of your project folder: for more instructions on how to do this on Windows and Mac, see [this guide](https://www.sweetwater.com/sweetcare/articles/how-to-zip-and-unzip-files/).
+### https://www.amazon.com/
 
-Please provide the source code only, a compiled binary is not necessary.
+![](./amazon.png)
+
+### https://www.spotify.com/us/
+
+![](./spotify.png)
+
+My cloudFlare site is most consistant than the other sites. My site's performance seems to be on par with other sites. 
+
